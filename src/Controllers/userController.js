@@ -4,6 +4,7 @@ const validation = require("../Middleware/validation")
 
 
 const userData = async (req, res) => {
+    try{
     let { title, name, phone, email, password, address } = req.body;
 
     // If empty request body
@@ -36,42 +37,42 @@ const userData = async (req, res) => {
     if (!validation.isValidPassword(password)) return res.status(400).send({ status: false, message: "Your password must contain atleast one number,uppercase,lowercase and special character[ @ $ ! % * ? & ] and length should be min of 8-15 charachaters" });
 
 
-    
-    const isValidPin =   /^[1-9][0-9]{6}*$/
+    //address validation
+    const isValidPin =   /^[0-9]{6}$/
     //If address is present
     if (address) {
         if (typeof address !== 'object') return res.status(400).send({ status: false, message: "'address' is not an object" })
         if (!validation.isValidRequest(address)) return res.status(400).send({ status: false, message: "'address' is empty" })
+      
 
         // In address the street is present
-        if (address.street) {
+        if (address && address.street) {
             if (!validation.isValid(address.street)) return res.status(400).send({ status: false, message: "'Please Enter street" })
         }
+          if (address && address.city && !validator.isValid(address.city)) {
+            return res.status(400).send({ status: false, message: "City is in wrong format" })
+        };
            // In address the city is present
-        if (address.city) {
+        if (address && address.city) {
             if (!validation.isValid(address.city)) return res.status(400).send({ status: false, message: "'Please Enter city" })
             if (!validation.isValidName(address.city)) return res.status(400).send({ status: false, message: "city is invalid" })
 
         }
          // In address the pincode is present
-        if (address.pincode) {
+        if (address && address.pincode) {
             if (!validation.isValid(address.pincode)) return res.status(400).send({ status: false, message: "'Please Enter pincode" })
             if (!isValidPin.test(address.pincode))return res.status(400).send({ status: false, message: "pincode should be 6 digit" })
         }
 
 
 
-
-
-
-
-
-
         // Create User
         const result = await userModel.create({ title, name, phone, email, password, address });
         res.status(201).send({ status: true, data: result });
-    }
-
+    }}
+catch (err){
+     return res.status(500).send({status:false,message:err.message});
+}
 
 }
 //Exporting Modules
