@@ -11,10 +11,10 @@ const userSchema = new mongoose.schema(
         address: {
           street: {type:String},
           city: {type:String},
-          pincode: {type:String}
+          pinCode: {type:String}
         },
 
-        },{timetamps:true}
+        },{timestamps:true}
     
       
 )

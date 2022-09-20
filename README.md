@@ -20,7 +20,7 @@
   address: {
     street: {string},
     city: {string},
-    pincode: {string}
+    pinCode: {string}
   },
   createdAt: {timestamp},
   updatedAt: {timestamp}
