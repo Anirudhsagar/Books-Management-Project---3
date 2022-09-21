@@ -36,88 +36,78 @@ const userData = async (req, res) => {
     if (!validation.isValidPassword(password)) return res.status(400).send({ status: false, message: "Your password must contain atleast one number,uppercase,lowercase and special character[ @ $ ! % * ? & ] and length should be min of 8-15 charachaters" });
 
 
-    
-    const isValidPin =  /^[1-9]{1}[0-9]{2}\s{0,1}[0-9]{3}$/
+
+    const isValidPin = /^[1-9]{1}[0-9]{2}\s{0,1}[0-9]{3}$/
 
     //If address is present
     if (address) {
         if (typeof address !== 'object') return res.status(400).send({ status: false, message: "'address' is not an object" })
         if (!validation.isValidRequest(address)) return res.status(400).send({ status: false, message: "'address' is empty" })
-            // const addressdata={street:address.street,city:address.city,pincode:address.pincode}
-            // let { street,city,pincode } = req.body.address;
-            // if (!validation.isValidRequest(req.body.address)) return res.status(400).send({ status: false, message: "Please enter adress data" });
+        // const addressdata={street:address.street,city:address.city,pincode:address.pincode}
+        // let { street,city,pincode } = req.body.address;
+        // if (!validation.isValidRequest(req.body.address)) return res.status(400).send({ status: false, message: "Please enter adress data" });
 
         // In address the street is present
         if (address.street) {
             if (!validation.isValid(address.street)) return res.status(400).send({ status: false, message: "'Please Enter street" })
         }
-           // In address the city is present
+        // In address the city is present
         if (address.city) {
             if (!validation.isValid(address.city)) return res.status(400).send({ status: false, message: "'Please Enter city" })
             if (!validation.isValidName(address.city)) return res.status(400).send({ status: false, message: "city is invalid" })
 
         }
-         // In address the pincode is present
+        // In address the pincode is present
         if (address.pincode) {
             if (!validation.isValid(address.pincode)) return res.status(400).send({ status: false, message: "'Please Enter pincode" })
-            if (!isValidPin.test(address.pincode))return res.status(400).send({ status: false, message: "pincode should be 6 digit" })
+            if (!isValidPin.test(address.pincode)) return res.status(400).send({ status: false, message: "pincode should be 6 digit" })
         }
-
-
-
-
-
-
-
 
 
         // Create User
         const result = await userModel.create({ title, name, phone, email, password, address });
         res.status(201).send({ status: true, data: result });
     }
-
-
 }
+
+
 const loginUser = async function (req, res) {
     try {
-        let userName = req.body.email;
-        let password = req.body.password;
-    
-       //edge case-1
-        if (!userName) { return res.status(400).send({ status: false, msg: "email is required" }) }
-        if(!validation.isValidEmail(userName)) {
-            return res.status(400).send({status: false, msg: "Email is not valid"})
-    }
-        //edge case-2
-        if (!password) { return res.status(400).send({ status: false, msg: "password is required" }) }
-            if(!validation.isValidPassword(password)) {
-                return res.status(400).send({status: false, msg: "password is not valid"})
-        }
+        const requestBody = req.body
+        // Validation of Request Body
+        if (!validation.isValidRequest(requestBody)) return res.status(400).send({ status: false, message: "Please enter the required credentials(email, password)." })
+        const { email, password } = requestBody
 
-        //edge case-3
-        let checkData = await userModel.findOne({ email: userName })
-        if (!checkData) {
-            return res.status(400).send({ status: false, msg: "You are not registered" })
-        }
-        if (password != checkData.password)
-        return res.status(404).send({status: false, msg: "Incorrect password"});
+        // Input Credential Validation
+        if (!validation.isValid(email)) return res.status(400).send({ status: false, message: "Please enter the emailId" })
+        if (!validation.isValid(password)) return res.status(400).send({ status: false, message: "Please enter the password" })
+
+        // Validation email & password 
+        if (!validation.isValidEmail(email)) return res.status(400).send({ status: false, message: "Not a valid emailId" })
+        if (!validation.isValidPassword(password)) return res.status(400).send({ status: false, message: "Not a valid password" })
+
+        // Finding the user
+        const checkData = await userModel.findOne({ email })
+        if (!checkData) return res.status(404).send({ status: false, message: "User email id not found." })
+
+        // Verifying the password
+        const actualPassWord = checkData.password
+        if (password !== actualPassWord) return res.status(401).send({ status: false, message: "Incorrect password" })
 
         //token generate
         let token = jwt.sign(
             {
                 userId: checkData._id.toString(),  // PAYLOAD
-               
-                iat: Math.floor(Date.now()/ 1000),
-                exp: Math.floor(Date.now()/ 1000)+ 10*60*60
+                iat: Math.floor(Date.now() / 1000),
+                exp: Math.floor(Date.now() / 1000) + 24 * 60 * 60
             },
-            "functionUp-plutonium-project-key"  //SECRET KEY
+            "plutonium-project-key"  //SECRET KEY
         );
         res.setHeader("x-api-key", token);
-        res.status(201).send({ status: true, token: token});
+        res.status(200).send({ status: true, message: "Author login successful", data: { token } })
     }
-
-    catch (error) {
-        res.status(500).send({ error: error.message })
+    catch (err) {
+        return res.status(500).send({ status: false, message: "Error", error: err.message })
     }
 };
 //Exporting Modules
