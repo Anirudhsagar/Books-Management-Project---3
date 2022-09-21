@@ -29,7 +29,7 @@ const createBook = async (req, res) => {
 
 
 
-        // excerpt Validation
+        // excerpt Validation  
 
         if (!validation.isValid(excerpt)) return res.status(400).send({ status: false, message: "enter valid excerpt" });
         //if (!isValidName(excerpt)) { return res.status(400).send({ status: false, message: "Excerpt is invalid" }) }
@@ -98,7 +98,7 @@ const getBooks = async function (req, res) {
         books.sort((a, b) => a.title.localeCompare(b.title))
         //edgeCase - 2
         if (books && books.length === 0) return res.status(404).send({ status: false, msg: "No data found for given user" });
-        return res.status(200).send({ status: true, message: books, data: books })
+        return res.status(200).send({ status: true, message: "Books list", data: books })
     }
     catch (err) {
         return res.status(500).send({ message: err.message })
