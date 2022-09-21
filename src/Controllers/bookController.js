@@ -26,7 +26,7 @@ const createBook = async (req, res) => {
 
         let checkTitle = await bookModel.findOne({ title })
         if (checkTitle) return res.status(400).send({ status: false, message: "Title has been already used please choose different" })
-  
+
 
 
         // excerpt Validation
@@ -37,9 +37,9 @@ const createBook = async (req, res) => {
 
         //userId Validation
         if (!validation.isValid(userId)) return res.status(400).send({ status: false, message: "UserId is required" });
-        if(!validation.isValidId(userId))return res.status(400).send({ status: false, message: "UserId is required" });
-       
-       
+        if (!validation.isValidId(userId)) return res.status(400).send({ status: false, message: "UserId is required" });
+
+
         let checkUerId = await userModel.findById({ _id: userId });
         if (!checkUerId) return res.status(404).send({ status: false, message: "User Id not found" });
 
@@ -65,6 +65,9 @@ const createBook = async (req, res) => {
         if (!validation.isValidDate(releasedAt)) return res.status(400).send({ status: false, message: "please provide releasedAt in correct format" })
 
 
+        // Can't Set deleted true at creation time
+        if (isDeleted == true) return res.status(400).send({ status: false, message: "You can't add this key at book creation time." })
+
         let savedData = await bookModel.create(req.body)
         return res.status(201).send({ status: true, data: savedData })
     }
@@ -73,7 +76,33 @@ const createBook = async (req, res) => {
     catch (error) {
         res.status(500).send({ status: false, message: error.message })
     }
-
 }
 
+
+const getBooks = async function (req, res) {
+    try {
+        let data = req.query
+        let querrydata = {
+            userId: data.userId,
+            category: data.category,
+            subcategory: data.subcategory
+        }
+        
+        if (!validation.isValid(querrydata)) return res.status(400).send({ status: false, message: "Invalid filter Keys" });
+        //edgeCase - 1 if userId is given then is it valid or not
+        if (data.userId) {
+            if (!validation.isValidId(data.userId)) return res.status(400).send({ status: false, message: "Not a valid userId" });
+        }
+        let books = await bookModel.find({ isDeleted: false, ...data }).sort({ title: 1 }).select({ _id: 1, title: 1, excerpt: 1, userId: 1, category: 1, releasedAt: 1, reviews: 1 })
+         // Sorting title alphabetically
+        books.sort((a, b) => a.title.localeCompare(b.title))
+        //edgeCase - 2
+        if (books && books.length === 0) return res.status(404).send({ status: false, msg: "No data found for given user" });
+        return res.status(200).send({ status: true, message: books, data: books })
+    }
+    catch (err) {
+        return res.status(500).send({ message: err.message })
+    }
+}
 module.exports.createBook = createBook
+module.exports.getBooks = getBooks

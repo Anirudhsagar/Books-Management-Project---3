@@ -55,7 +55,6 @@ const userData = async (req, res) => {
         if (address.city) {
             if (!validation.isValid(address.city)) return res.status(400).send({ status: false, message: "'Please Enter city" })
             if (!validation.isValidName(address.city)) return res.status(400).send({ status: false, message: "city is invalid" })
-
         }
         // In address the pincode is present
         if (address.pincode) {

@@ -12,7 +12,7 @@ router.post("/login", userController.loginUser);
 
 //Book API
 router.post("/books", middleware.auth,bookController.createBook)
-
+router.get("/books",middleware.auth, bookController.getBooks)
 
 
 module.exports = router
