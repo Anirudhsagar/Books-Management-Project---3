@@ -1,10 +1,9 @@
 const userModel = require("../Models/userModel")
 const validation = require("../Middleware/validation")
-
+const jwt = require("jsonwebtoken");
 
 
 const userData = async (req, res) => {
-    try{
     let { title, name, phone, email, password, address } = req.body;
 
     // If empty request body
@@ -37,43 +36,91 @@ const userData = async (req, res) => {
     if (!validation.isValidPassword(password)) return res.status(400).send({ status: false, message: "Your password must contain atleast one number,uppercase,lowercase and special character[ @ $ ! % * ? & ] and length should be min of 8-15 charachaters" });
 
 
-    //address validation
-    const isValidPin =   /^[0-9]{6}$/
+    
+    const isValidPin =  /^[1-9]{1}[0-9]{2}\s{0,1}[0-9]{3}$/
+
     //If address is present
     if (address) {
         if (typeof address !== 'object') return res.status(400).send({ status: false, message: "'address' is not an object" })
         if (!validation.isValidRequest(address)) return res.status(400).send({ status: false, message: "'address' is empty" })
-      
+            // const addressdata={street:address.street,city:address.city,pincode:address.pincode}
+            // let { street,city,pincode } = req.body.address;
+            // if (!validation.isValidRequest(req.body.address)) return res.status(400).send({ status: false, message: "Please enter adress data" });
 
         // In address the street is present
-        if (address && address.street) {
+        if (address.street) {
             if (!validation.isValid(address.street)) return res.status(400).send({ status: false, message: "'Please Enter street" })
         }
-          if (address && address.city && !validator.isValid(address.city)) {
-            return res.status(400).send({ status: false, message: "City is in wrong format" })
-        };
            // In address the city is present
-        if (address && address.city) {
+        if (address.city) {
             if (!validation.isValid(address.city)) return res.status(400).send({ status: false, message: "'Please Enter city" })
             if (!validation.isValidName(address.city)) return res.status(400).send({ status: false, message: "city is invalid" })
 
         }
          // In address the pincode is present
-        if (address && address.pincode) {
+        if (address.pincode) {
             if (!validation.isValid(address.pincode)) return res.status(400).send({ status: false, message: "'Please Enter pincode" })
             if (!isValidPin.test(address.pincode))return res.status(400).send({ status: false, message: "pincode should be 6 digit" })
         }
 
 
 
+
+
+
+
+
+
         // Create User
         const result = await userModel.create({ title, name, phone, email, password, address });
         res.status(201).send({ status: true, data: result });
-    }}
-catch (err){
-     return res.status(500).send({status:false,message:err.message});
-}
+    }
+
 
 }
+const loginUser = async function (req, res) {
+    try {
+        let userName = req.body.email;
+        let password = req.body.password;
+    
+       //edge case-1
+        if (!userName) { return res.status(400).send({ status: false, msg: "email is required" }) }
+        if(!validation.isValidEmail(userName)) {
+            return res.status(400).send({status: false, msg: "Email is not valid"})
+    }
+        //edge case-2
+        if (!password) { return res.status(400).send({ status: false, msg: "password is required" }) }
+            if(!validation.isValidPassword(password)) {
+                return res.status(400).send({status: false, msg: "password is not valid"})
+        }
+
+        //edge case-3
+        let checkData = await userModel.findOne({ email: userName })
+        if (!checkData) {
+            return res.status(400).send({ status: false, msg: "You are not registered" })
+        }
+        if (password != checkData.password)
+        return res.status(404).send({status: false, msg: "Incorrect password"});
+
+        //token generate
+        let token = jwt.sign(
+            {
+                userId: checkData._id.toString(),  // PAYLOAD
+               
+                iat: Math.floor(Date.now()/ 1000),
+                exp: Math.floor(Date.now()/ 1000)+ 10*60*60
+            },
+            "functionUp-plutonium-project-key"  //SECRET KEY
+        );
+        res.setHeader("x-api-key", token);
+        res.status(201).send({ status: true, token: token});
+    }
+
+    catch (error) {
+        res.status(500).send({ error: error.message })
+    }
+};
 //Exporting Modules
+
 module.exports.userData = userData
+module.exports.loginUser = loginUser

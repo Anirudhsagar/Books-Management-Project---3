@@ -53,4 +53,4 @@ const isValidTitle = function (title) {
 
 
 //Exporting modules
-module.exports = { isValidEmail, isValidPassword, isValid, isValidName, isValidTitle, isValidPhone, isValidRequest}//,isValidPin}
+module.exports = { isValidEmail, isValidPassword, isValid, isValidName, isValidTitle, isValidPhone, isValidRequest}
