@@ -9,7 +9,7 @@ const createBook = async (req, res) => {
 
     try {
 
-        let { title, excerpt, userId, ISBN, category,bookCover, subcategory, releasedAt } = req.body;
+        let { title, excerpt, userId, ISBN, category, subcategory, releasedAt } = req.body;
 
         // If empty request body
         if (!validation.isValidRequest(req.body)) return res.status(400).send({ status: false, message: "Please enter User data" });
@@ -29,8 +29,6 @@ const createBook = async (req, res) => {
   
 
 
-        if (!validation.isValid(bookCover)) return res.status(400).send({ status: false, message: "bookCover is required" })
-        if (!validation.isValidName(bookCover)) { return res.status(400).send({ status: false, msg: "bookCover  is invalid" }) }
         // excerpt Validation
 
         if (!validation.isValid(excerpt)) return res.status(400).send({ status: false, message: "enter valid excerpt" });
