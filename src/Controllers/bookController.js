@@ -180,10 +180,10 @@ const updateBooks = async (req, res) => {
     try {
         let bookId = req.params.bookId
         if (!bookId) res.status(400).send({ status: false, message: "bookId is required" });
+
         let book = await bookModel.findById(bookId)
-        if (!book || book.isDeleted == true) {
-            return res.status(404).send({ status: false, message: "No Book Found" })
-        }
+        if (!book || book.isDeleted == true) return res.status(404).send({ status: false, message: "No Book Found" })
+
 
         const requestUserId = findBook.userId
         if (loggedUserId !== requestUserId.toString()) return res.status(403).send({ status: false, message: "Unauthorized access" })
@@ -192,62 +192,68 @@ const updateBooks = async (req, res) => {
 
         let { title, excerpt, releasedAt, ISBN } = req.body
 
-        let titleExist = await bookModel.findOne({ title: title })
-        if (titleExist) return res.status(400).send({ status: false, message: "title exist already" });
+
+        if (title) {
+            if (!validation.isValid(title)) return res.status(400).send({ status: false, message: "Title is in incorrect format" })
+
+            let titleExist = await bookModel.findOne({ title: title })
+            if (titleExist) return res.status(400).send({ status: false, message: "title exist already" });
+
+            if (ISBN)
+                if (!validation.isValid(ISBN)) return res.status(400).send({ status: false, message: "ISBN is in incorrect format" })
+
+            let isbnExist = await bookModel.findOne({ ISBN: ISBN })
+            if (isbnExist) return res.status(400).send({ status: false, message: "isbn exist already" });
 
 
-        let isbnExist = await bookModel.findOne({ ISBN: ISBN })
-        if (isbnExist) return res.status(400).send({ status: false, message: "isbn exist already" });
+            if (excerpt && !validation.isValid(excerpt)) return res.status(400).send({ status: false, message: "Excerpt is in incorrect format" })
 
 
-        if (excerpt && !validation.isValid(excerpt)) return res.status(400).send({ status: false, message: "Excerpt is in incorrect format" })
+            if (releasedAt) {
+                if (!validation.isValid(releasedAt) || !validation.isValidDate(releasedAt)) return res.status(400).send({ status: false, message: "releasedAt is in incorrect format..! Required (YYYY-MM-DD)" })
 
 
-        if (releasedAt) {
-            if (!validation.isValid(releasedAt) || !validation.isValidDate(releasedAt)) return res.status(400).send({ status: false, message: "releasedAt is in incorrect format..! Required (YYYY-MM-DD)" })
+                let data = await bookModel.findById(bookId)
+                if (!data.isDeleted == false) return res.status(400).send({ status: false, message: "data is already deleted" });
 
 
-            let data = await bookModel.findById(bookId)
-            if (!data.isDeleted == false) {
-                return res.status(400).send({ status: false, message: "data is already deleted" });
+                let updateBook = await bookModel.findByIdAndUpdate({ _id: bookId, isDeleted: false }, req.body, { new: true })
+                res.status(200).send({ status: true, data: updateBook });
+
             }
 
-            let updateBook = await bookModel.findByIdAndUpdate({ _id: bookId, isDeleted: false }, req.body, { new: true })
-            res.status(200).send({ status: true, data: updateBook });
 
         }
-
-
-        } catch (error) {
-            res.status(500).send({ status: false, message: error.message });
-        }
+    } catch (error) {
+        res.status(500).send({ status: false, message: error.message });
     }
+}
 
 const deleteBook = async function (req, res) {
-        try {
-            const bookId = req.params.bookId
-            if (!validation.isValidId(bookId)) return res.status(400).send({ status: false, message: "Please provide the valid bookId" });
+    try {
+        const bookId = req.params.bookId
+        if (!validation.isValidId(bookId)) return res.status(400).send({ status: false, message: "Please provide the valid bookId" });
 
 
-            const findDeletedBook = await bookModel.findById({ _id: bookId, isDeleted: false });
-            if (!findDeletedBook || findDeletedBook.isDeleted == true) return res.status(404).send({ status: false, message: "Book not found" });
+        const findDeletedBook = await bookModel.findById({ _id: bookId, isDeleted: false });
+        if (!findDeletedBook || findDeletedBook.isDeleted == true) return res.status(404).send({ status: false, message: "Book not found" });
 
-            const userIdFromToken = req.userId
-            if (userIdFromToken !== findDeletedBook.userId.toString()) return res.status(403).send({ status: false, message: "Unauthorized Access." })
-
-
-
-
-            await bookModel.findOneAndUpdate({ _id: bookId }, { $set: { isDeleted: true, deletedAt: new Date() } }, { new: true })
+        const userIdFromToken = req.userId
+        if (userIdFromToken !== findDeletedBook.userId.toString()) return res.status(403).send({ status: false, message: "Unauthorized Access." })
 
 
 
-            res.status(200).send({ status: true, message: " book are Deleted" });
-        }
-        catch (err) {
-            return res.status(500).send({ status: false, message: err.message })
-        }
+
+        await bookModel.findOneAndUpdate({ _id: bookId }, { $set: { isDeleted: true, deletedAt: new Date() } }, { new: true })
+
+
+
+        res.status(200).send({ status: true, message: " book are Deleted" });
     }
+    catch (err) {
+        return res.status(500).send({ status: false, message: err.message })
+    }
+}
 
 
 
@@ -274,8 +280,8 @@ const deleteBook = async function (req, res) {
 
 
 
-    module.exports.createBook = createBook
-    module.exports.getBooks = getBooks
-    module.exports.getBooksById = getBooksById
-    module.exports.deleteBook = deleteBook
-    module.exports.updateBooks = updateBooks
+module.exports.createBook = createBook
+module.exports.getBooks = getBooks
+module.exports.getBooksById = getBooksById
+module.exports.deleteBook = deleteBook
+module.exports.updateBooks = updateBooks
