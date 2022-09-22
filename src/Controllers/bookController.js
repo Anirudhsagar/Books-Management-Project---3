@@ -185,8 +185,8 @@ const updateBooks = async (req, res) => {
         if (!book || book.isDeleted == true) return res.status(404).send({ status: false, message: "No Book Found" })
 
 
-        const requestUserId = findBook.userId
-        if (loggedUserId !== requestUserId.toString()) return res.status(403).send({ status: false, message: "Unauthorized access" })
+        const requestUserId = book.userId
+        if (requestUserId !== book.toString()) return res.status(403).send({ status: false, message: "Unauthorized access" })
 
 
 
@@ -200,7 +200,7 @@ const updateBooks = async (req, res) => {
             if (titleExist) return res.status(400).send({ status: false, message: "title exist already" });
 
             if (ISBN)
-                if (!validation.isValid(ISBN)) return res.status(400).send({ status: false, message: "ISBN is in incorrect format" })
+                if (!validation.isValid(ISBN)|| !validation.isValidISBN(ISBN)) return res.status(400).send({ status: false, message: "ISBN is in incorrect format" })
 
             let isbnExist = await bookModel.findOne({ ISBN: ISBN })
             if (isbnExist) return res.status(400).send({ status: false, message: "isbn exist already" });
@@ -217,7 +217,7 @@ const updateBooks = async (req, res) => {
                 if (!data.isDeleted == false) return res.status(400).send({ status: false, message: "data is already deleted" });
 
 
-                let updateBook = await bookModel.findByIdAndUpdate({ _id: bookId, isDeleted: false }, req.body, { new: true })
+              //  let updateBook = await bookModel.findByIdAndUpdate({ _id: bookId, isDeleted: false }, req.body, { new: true })
                 res.status(200).send({ status: true, data: updateBook });
 
             }
