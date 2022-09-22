@@ -186,20 +186,28 @@ const updateBooks = async (req, res) => {
 
 
         const requestUserId = book.userId
-        if (requestUserId !== book.toString()) return res.status(403).send({ status: false, message: "Unauthorized access" })
+        if( req.userId !== requestUserId .toString()) return res.status(403).send({ status: false, message: "Unauthorized access" })
+
+
+        
 
 
 
         let { title, excerpt, releasedAt, ISBN } = req.body
+          
+        if (title ==""){return res.status(400).send({ status: false, message: "title can't be empty" })}
+        
 
+       else if (title) {
 
-        if (title) {
-            if (!validation.isValid(title)) return res.status(400).send({ status: false, message: "Title is in incorrect format" })
+           if  (!validation.isValid(title)) return res.status(400).send({ status: false, message: "Title is in incorrect format" })
 
             let titleExist = await bookModel.findOne({ title: title })
             if (titleExist) return res.status(400).send({ status: false, message: "title exist already" });
 
-            if (ISBN)
+            if (ISBN ==""){return res.status(400).send({ status: false, message: "ISBN can't be empty" })}
+
+             else if (ISBN)
                 if (!validation.isValid(ISBN)|| !validation.isValidISBN(ISBN)) return res.status(400).send({ status: false, message: "ISBN is in incorrect format" })
 
             let isbnExist = await bookModel.findOne({ ISBN: ISBN })
@@ -208,18 +216,22 @@ const updateBooks = async (req, res) => {
 
             if (excerpt && !validation.isValid(excerpt)) return res.status(400).send({ status: false, message: "Excerpt is in incorrect format" })
 
-
-            if (releasedAt) {
-                if (!validation.isValid(releasedAt) || !validation.isValidDate(releasedAt)) return res.status(400).send({ status: false, message: "releasedAt is in incorrect format..! Required (YYYY-MM-DD)" })
+      
+            if (releasedAt ==""){return res.status(400).send({ status: false, message: "releasedAt can't be empty" })}
+          else if (releasedAt) {
+                if ( !validation.isValidDate(releasedAt)) return res.status(400).send({ status: false, message: "releasedAt is in incorrect format..! Required (YYYY-MM-DD)" })
 
 
                 let data = await bookModel.findById(bookId)
                 if (!data.isDeleted == false) return res.status(400).send({ status: false, message: "data is already deleted" });
 
-
-              //  let updateBook = await bookModel.findByIdAndUpdate({ _id: bookId, isDeleted: false }, req.body, { new: true })
-                res.status(200).send({ status: true, data: updateBook });
-
+                let updatedBook = await bookModel.findOneAndUpdate(
+                    { _id: req.params.bookId },
+                    { $set: { title: title, excerpt: excerpt, releasedAt: releasedAt, ISBN: ISBN } },
+                    { new: true }
+                )
+                return res.status(200).send({ status: true, message: 'Success', data: updatedBook })
+        
             }
 
 
