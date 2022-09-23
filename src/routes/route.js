@@ -18,7 +18,8 @@ router.put("/books/:bookId", middleware.auth, bookController.updateBooks)
 router.delete("/books/:bookId", middleware.auth, bookController.deleteBook)
 
 router.post("/books/:bookId/review", reviewController.createReview)
-
+router.put("/books/:bookId/review/:reviewId", reviewController.createReview)
+router.delete("/books/:bookId/review/:reviewId",reviewController.deletedReview)
 
 
 router.all('/*', (req, res) => {
