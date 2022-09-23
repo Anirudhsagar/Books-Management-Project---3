@@ -77,7 +77,7 @@ const updateReview = async (req, res) => {
 
 
         if (!bookId || !validation.isValidRequest(bookId)) return res.status(400).send({ status: false, message: "Enter a valid Book Id" })
-        if (!reviewId ||!validation.isValidRequest(reviewId)) return res.status(400).send({ status: false, message: "Enter a valid reviewId Id" })
+        if (!reviewId || !validation.isValidRequest(reviewId)) return res.status(400).send({ status: false, message: "Enter a valid reviewId Id" })
 
         let book = await bookModel.findOne({ _id: bookId, isDeleted: false })
         if (!validation.isValid(bookId)) return res.status(404).send({ status: false, message: "bookId does't exist" })
@@ -87,17 +87,25 @@ const updateReview = async (req, res) => {
 
 
         const bookIdfromreview = findReview.bookId.toObject()
-        if (bookId !== bookIdfromreview )return res.status(400).send({ status: false, message: "review you want to delete not belongs to the book provide in URL" })
+        if (bookId !== bookIdfromreview) return res.status(400).send({ status: false, message: "review you want to delete not belongs to the book provide in URL" })
 
+
+
+        let { review, rating, reviewedBy } = reviewByData
+        if (!validation.isValidRequest(reviewByData)) return res.status(400).send({ status: false, message: "provide the data in the body to update the review" })
 
        
-        let { review, rating, reviewedBy } = reviewByData
-        if (!validation.isValidRequest(reviewData)) return res.status(400).send({ status: false, message: "provide the data in the body to update the review" })
-
-        if (reviewedBy =="") {return res.status(400).send({ status: false, message: "reviewer name can't be empty" })}
-        else if (reviewedBy) {
-            if ( !validation.isValid(reviewedBy)|| !validation.isValidName(reviewedBy)) return res.status(400).send({ status: false, message: " ReviewBy should reqiure" })}
-            reviewByData['reviewedBy'] = reviewByData
+       
+        if (!review == "") 
+       {  console.log(review)
+        
+         return res.status(400).send({ status: false, message: "reviewer name can't be empty" }) }
+       
+        
+         else if (review) {
+            if (!validation.isValid(review) || !validation.isValidName(review)) return res.status(400).send({ status: false, message: " ReviewBy should reqiure" })
+        }
+        reviewByData['review'] = reviewByData
 
 
 
@@ -125,33 +133,33 @@ const updateReview = async (req, res) => {
 
 
 
-const deletedReview = async (req, res)=>{
+const deletedReview = async (req, res) => {
     try {
         let bookId = req.params.bookId
-       
+
         let reviewId = req.params.reviewId
-        
-        if(!reviewId ||!validation.isValidId(reviewId))return res.status(400).send({ status: false, message: "Enter a valid reviewId Id" })
-        if(!bookId || !validation.isValidId(bookId))return res.status(400).send({ status: false, message: "Enter a valid Book Id" })
+
+        if (!reviewId || !validation.isValidId(reviewId)) return res.status(400).send({ status: false, message: "Enter a valid reviewId Id" })
+        if (!bookId || !validation.isValidId(bookId)) return res.status(400).send({ status: false, message: "Enter a valid Book Id" })
 
 
-        let book = await bookModel.findOne({ _id: bookId, isDeleted: false})
+        let book = await bookModel.findOne({ _id: bookId, isDeleted: false })
         if (!book) return res.status(404).send({ status: false, message: "bookId does't exist" })
 
-        let reviewDoc = await reviewModel.findOne({ _id: reviewId, bookId:book, isDeleted: false})
+        let reviewDoc = await reviewModel.findOne({ _id: reviewId, bookId: book, isDeleted: false })
         if (!reviewDoc) return res.status(404).send({ status: false, message: "reviewId does't exist" })
 
-        
+
         const bookIdfromreview = reviewDoc.toObject()
-        if (bookId !== bookIdfromreview )return res.status(400).send({ status: false, message: "review you want to delete not belongs to the book provide in URL" })
+        if (bookId !== bookIdfromreview) return res.status(400).send({ status: false, message: "review you want to delete not belongs to the book provide in URL" })
 
 
-          //Deleting the review
-        await reviewModel.findOneAndUpdate({ _id: reviewId },{ isDeleted: true})
+        //Deleting the review
+        await reviewModel.findOneAndUpdate({ _id: reviewId }, { isDeleted: true })
         // Decrease Reviews count of the book 
-        await bookModel.findOneAndUpdate({ _id: book},{ $inc: {reviews: -1}})
+        await bookModel.findOneAndUpdate({ _id: book }, { $inc: { reviews: -1 } })
 
-        return res.status(200).send({ status: true, message: " Review deleted successfully."})
+        return res.status(200).send({ status: true, message: " Review deleted successfully." })
 
     } catch (error) {
         return res.status(500).send({ status: false, message: error.message })
