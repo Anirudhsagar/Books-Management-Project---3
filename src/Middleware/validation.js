@@ -60,7 +60,10 @@ const isValidDate =function(date){
     const dateRegex = /^\d{4}-(02-(0[1-9]|[12][0-9])|(0[469]|11)-(0[1-9]|[12][0-9]|30)|(0[13578]|1[02])-(0[1-9]|[12][0-9]|3[01]))$/
     return dateRegex.test(date)
 }
-
+const isValidRating =function (ISBN){
+    const RatingRegex = /^[1-5]$/
+    return RatingRegex.test(ISBN)
+}
 
 const isValidId = function (data) {
     return mongoose.Types.ObjectId.isValid(data);
@@ -69,4 +72,4 @@ const isValidId = function (data) {
 
 
 //Exporting modules
-module.exports = {isValidId,isValidISBN,isValidDate, isValidEmail, isValidPassword, isValid, isValidName, isValidTitle, isValidPhone, isValidRequest}
+module.exports = {isValidId,isValidISBN,isValidDate,isValidRating,isValidEmail, isValidPassword, isValid, isValidName, isValidTitle, isValidPhone, isValidRequest}
