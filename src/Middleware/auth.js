@@ -13,7 +13,7 @@ const auth = async function (req, res, next) {
         catch (err) {
             return res.status(401).send({ status: false, message: "Invalid Token", error: err.message })
         }
-        req.userId = decodedToken.userId
+       req.userId = decodedToken.userId
         next();
     } catch (err) {
         return res.status(500).send({ msg: "Error", error: err.message })

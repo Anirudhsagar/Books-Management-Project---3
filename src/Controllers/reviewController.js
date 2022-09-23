@@ -6,6 +6,9 @@ const reviewModel = require("../Models/reviewModel");
 
 
 const createReview = async function (req, res) {
+
+  try {
+
     
         const reviewData = req.body;
         const bookIdParams = req.params.bookId
@@ -35,12 +38,27 @@ const createReview = async function (req, res) {
      if (isDeleted == true) return res.status(400).send({ status: false, message: "You can't add this key at book creation time." })
 
      reviewData['bookId'] = bookIdParams
-
-     const createReview = await reviewModel.create(reviewData)
-     return res.status(201).send({ status: true, data: createReview })
-
     
+     reviewData['reviewedAt'] = new Date()
+
+        const createReview = await reviewModel.create(reviewData)
+
+     
+        const reviewList = await reviewModel.findOne({ _id: createReview._id }).select({ isDeleted: 0, createdAt: 0, updatedAt: 0, __v: 0 })
+
+        const updatingReviewCount = await bookModel.findOneAndUpdate({ _id: bookIdParams }, { $inc: { reviews: +1 } }, { new: true }).select({ __v: 0 })
+
+        
+        const bookWithReview = updatingReviewCount.toObject()
+        bookWithReview['reviewsData'] = reviewList
+
+        res.status(201).send({ status: true, messege: "Review Successful", data: bookWithReview })
+    }
+    catch (err) {
+        return res.status(500).send({ status: false, messege: err.message })
+    }
 }
+
 
 
 
