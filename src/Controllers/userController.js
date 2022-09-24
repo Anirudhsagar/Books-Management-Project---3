@@ -67,8 +67,8 @@ const userData = async (req, res) => {
         res.status(201).send({ status: true, data: result });
     }
 }
-catch (err) {
-    return res.status(500).send({ status: false, message: "Error", error: err.message })
+catch (error) {
+    return res.status(500).send({ status: false, message: "Error", error: error.message })
 }
 }
 

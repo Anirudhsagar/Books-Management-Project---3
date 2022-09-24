@@ -14,8 +14,7 @@ const createBook = async (req, res) => {
         if (!validation.isValidRequest(req.body)) return res.status(400).send({ status: false, message: "Please enter User data" });
 
         //Authorization
-        const userIdFromToken = req.userId
-        if (userIdFromToken !== userId) return res.status(403).send({ status: false, message: "Unauthorized Access." })
+       
 
         // Title Validation
         if (!validation.isValid(title)) return res.status(400).send({ status: false, message: "Title is required" })
@@ -32,8 +31,11 @@ const createBook = async (req, res) => {
         if (!validation.isValid(userId)) return res.status(400).send({ status: false, message: "UserId is required" });
         if (!validation.isValidId(userId)) return res.status(400).send({ status: false, message: "UserId is required" });
 
-        let checkUerId = await userModel.findById({ _id: userId });
+        let checkUerId = await userModel.findById({_id: userId });
         if (!checkUerId) return res.status(404).send({ status: false, message: "User Id not found" });
+
+        const userIdFromToken = req.userId
+        if (userIdFromToken !== userId) return res.status(403).send({ status: false, message: "Unauthorized Access." })
 
         //ISBN Validation
         if (!validation.isValid(ISBN)) return res.status(400).send({ status: false, message: "ISBN Number  is Required." });
@@ -144,7 +146,7 @@ const updateBooks = async (req, res) => {
         if (title == "") {
             return res.status(400).send({ status: false, message: "Title is cannot be empty" })
         } else if (title) {
-            if (!validation.isValid(title) || !validation.isValidScripts(title))
+            if (!validation.isValid(title))
                 return res.status(400).send({ status: false, message: "Title is invalid (Should Contain Alphabets, numbers, quotation marks  & [@ , . ; : ? & ! _ - $]." })
 
             const uniqueTitle = await bookModel.findOne({ title })
@@ -184,11 +186,11 @@ const updateBooks = async (req, res) => {
 
 
         // Final data Updation
-        const updatedDetails = await bookModel.findOneAndUpdate({ _id: bookIdParams }, dataToUpdate, { new: true })
-        res.status(200).send({ status: true, msg: "Book details updated successfully", data: updatedDetails })
+        const updatedDetails = await bookModel.findByIdAndUpdate({ _id: bookIdParams }, dataToUpdate, { new: true })
+        res.status(200).send({ status: true, message: "Book details updated successfully", data: updatedDetails })
     }
-    catch (err) {
-        return res.status(500).send({ status: false, message: err.message });
+    catch (error) {
+        return res.status(500).send({ status: false, message: error.message });
     }
 }
 
@@ -227,3 +229,9 @@ module.exports.getBooks = getBooks
 module.exports.updateBooks = updateBooks
 module.exports.getBooksById = getBooksById
 module.exports.deleteBook = deleteBook
+
+
+
+
+
+
