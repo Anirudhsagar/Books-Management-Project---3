@@ -4,7 +4,7 @@ const reviewModel = require("../Models/reviewModel");
 const validation = require("../Middleware/validation");
 
 
-
+//---------------------------------------------------------------------Create Review-------------------------------------------------------------------------//
 const createReview = async function (req, res) {
     try {
         const reviewData = req.body;
@@ -22,10 +22,10 @@ const createReview = async function (req, res) {
         let { reviewedBy, rating, review, isDeleted } = reviewData
 
         // Validation of reviewby
-        
-            if (!validation.isValid(reviewedBy)) return res.status(400).send({ status: false, message: "Please Enter reviwedBy name" });
-            if (!validation.isValidName(reviewedBy)) return res.status(400).send({ status: false, message: "Reviewer's Name should contain alphabets only." });
-        
+
+        if (!validation.isValid(reviewedBy)) return res.status(400).send({ status: false, message: "Please Enter reviwedBy name" });
+        if (!validation.isValidName(reviewedBy)) return res.status(400).send({ status: false, message: "Reviewer's Name should contain alphabets only." });
+
 
         //Rating Validation
         if (!validation.isValid(rating)) return res.status(400).send({ status: false, messege: "Rating is required" })
@@ -49,12 +49,7 @@ const createReview = async function (req, res) {
         const reviewList = await reviewModel.findOne({ _id: createReview._id }).select({ isDeleted: 0, createdAt: 0, updatedAt: 0, __v: 0 }).populate("bookId")
 
         // Updating The review count
-        const updatingReviewCount = await bookModel.findOneAndUpdate({ _id: bookIdParams }, { $inc: { reviews: +1 } }, { new: true }).select({ __v: 0 })
-
-        // // Assigning reviews list
-        // const bookWithReview = updatingReviewCount.toObject()
-        // bookWithReview['reviewsData'] = reviewList
-
+         await bookModel.findOneAndUpdate({ _id: bookIdParams }, { $inc: { reviews: +1 } }, { new: true }).select({ __v: 0 })
         res.status(201).send({ status: true, message: "Review Successful", data: reviewList })
     }
     catch (error) {
@@ -62,7 +57,7 @@ const createReview = async function (req, res) {
     }
 }
 
-
+//-------------------------------------------------------------------Update Review--------------------------------------------------------------------------//
 
 const updateReview = async function (req, res) {
     try {
@@ -91,23 +86,19 @@ const updateReview = async function (req, res) {
         if (!validation.isValidRequest(dataToUpdate)) return res.status(400).send({ status: false, message: "Please enter details you want to update." })
 
         //If Reviewed by is present 
-        
-            if (!validation.isValid(reviewedBy) || !validation.isValidName(reviewedBy))
-                return res.status(400).send({ status: false, message: "ReviewBy Should Contain only alphabets." })
-        
+        if (!validation.isValid(reviewedBy) || !validation.isValidName(reviewedBy))
+            return res.status(400).send({ status: false, message: "ReviewBy Should Contain only alphabets." })
         dataToUpdate['reviewedBy'] = reviewedBy
 
         //If Rating by is present 
-       
-            if (((rating < 1) || (rating > 5)) || !validation.isValidRating(rating))
-                return res.status(400).send({ status: false, message: "Rating must be 1 to 5 numerical value" });
-        
+        if (((rating < 1) || (rating > 5)) || !validation.isValidRating(rating))
+            return res.status(400).send({ status: false, message: "Rating must be 1 to 5 numerical value" });
         dataToUpdate['rating'] = rating
 
         //If Review by is present 
-         if (review) {
+        if (review) {
             if (!validation.isValid(review)) return res.status(400).send({ status: false, message: "Review is invalid." })
-         }
+        }
         dataToUpdate['review'] = review
 
         // Updating The review details
@@ -117,15 +108,15 @@ const updateReview = async function (req, res) {
         const booksWithUpdatedReview = findBook.toObject()
         booksWithUpdatedReview['reviewsData'] = updatedReview
 
-       return  res.status(200).send({ status: true, message: "Review Updated successfully", data: booksWithUpdatedReview })
+        return res.status(200).send({ status: true, message: "Review Updated successfully", data: booksWithUpdatedReview })
 
     } catch (error) {
-         res.status(500).send({ status: false, message: error.message })
+        res.status(500).send({ status: false, message: error.message })
     }
 }
 
 
-
+//---------------------------------------------------------------------------Delete Api for review----------------------------------------------------------//
 
 
 const deletedReview = async (req, res) => {
@@ -145,8 +136,6 @@ const deletedReview = async (req, res) => {
         let reviewDoc = await reviewModel.findOne({ _id: reviewId, bookId: book, isDeleted: false })
         if (!reviewDoc) return res.status(404).send({ status: false, message: "reviewId does't exist" })
 
-     
-
         //Deleting the review
         await reviewModel.findOneAndUpdate({ _id: reviewId }, { isDeleted: true })
         // Decrease Reviews count of the book 
@@ -158,17 +147,6 @@ const deletedReview = async (req, res) => {
         return res.status(500).send({ status: false, message: error.message })
     }
 }
-
-
-
-
-
-
-
-
-
-
-
 
 
 

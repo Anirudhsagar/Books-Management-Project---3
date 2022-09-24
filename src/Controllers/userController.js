@@ -2,7 +2,7 @@ const userModel = require("../Models/userModel")
 const validation = require("../Middleware/validation")
 const jwt = require("jsonwebtoken");
 
-
+//---------------------------------------------------------Create User Api------------------------------------------------------------------------------------//
 const userData = async (req, res) => {
     try {
     let { title, name, phone, email, password, address } = req.body;
@@ -38,7 +38,7 @@ const userData = async (req, res) => {
 
 
     //Address Validation
-    const isValidPin = /^[1-9]{1}[0-9]{2}\s{0,1}[0-9]{3}$/
+    const isValidPin = /^[0-9]{6}$/
 
     //If address is present
     if (address) {
@@ -61,7 +61,6 @@ const userData = async (req, res) => {
             if (!isValidPin.test(address.pincode)) return res.status(400).send({ status: false, message: "pincode should be 6 digit" })
         }
 
-
         // Create User
         const result = await userModel.create({ title, name, phone, email, password, address });
         res.status(201).send({ status: true, data: result });
@@ -72,6 +71,7 @@ catch (error) {
 }
 }
 
+//----------------------------------------------------------------------Login User Api------------------------------------------------------------------------//
 const loginUser = async function (req, res) {
     try {
         const requestBody = req.body
