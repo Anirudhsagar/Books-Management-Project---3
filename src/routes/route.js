@@ -17,11 +17,12 @@ router.get("/books/:bookId", middleware.auth, bookController.getBooksById)
 router.put("/books/:bookId", middleware.auth, bookController.updateBooks)
 router.delete("/books/:bookId", middleware.auth, bookController.deleteBook)
 
+//Review API
 router.post("/books/:bookId/review", reviewController.createReview)
 router.put("/books/:bookId/review/:reviewId", reviewController.createReview)
 router.delete("/books/:bookId/review/:reviewId",reviewController.deletedReview)
 
-
+//Error Handing
 router.all('/*', (req, res) => {
     res.status(404).send({ status: false, message: "URL Not Found" })
 })

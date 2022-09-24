@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken");
 
 
 const userData = async (req, res) => {
+    try {
     let { title, name, phone, email, password, address } = req.body;
 
     // If empty request body
@@ -36,16 +37,14 @@ const userData = async (req, res) => {
     if (!validation.isValidPassword(password)) return res.status(400).send({ status: false, message: "Your password must contain atleast one number,uppercase,lowercase and special character[ @ $ ! % * ? & ] and length should be min of 8-15 charachaters" });
 
 
-
+    //Address Validation
     const isValidPin = /^[1-9]{1}[0-9]{2}\s{0,1}[0-9]{3}$/
 
     //If address is present
     if (address) {
         if (typeof address !== 'object') return res.status(400).send({ status: false, message: "'address' is not an object" })
         if (!validation.isValidRequest(address)) return res.status(400).send({ status: false, message: "'address' is empty" })
-        // const addressdata={street:address.street,city:address.city,pincode:address.pincode}
-        // let { street,city,pincode } = req.body.address;
-        // if (!validation.isValidRequest(req.body.address)) return res.status(400).send({ status: false, message: "Please enter adress data" });
+
 
         // In address the street is present
         if (address.street) {
@@ -68,7 +67,10 @@ const userData = async (req, res) => {
         res.status(201).send({ status: true, data: result });
     }
 }
-
+catch (err) {
+    return res.status(500).send({ status: false, message: "Error", error: err.message })
+}
+}
 
 const loginUser = async function (req, res) {
     try {

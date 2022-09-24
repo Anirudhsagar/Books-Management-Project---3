@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-
+//Authentication & Authorization
 const auth = async function (req, res, next) {
     try {
         let token = req.headers["x-api-key"];
