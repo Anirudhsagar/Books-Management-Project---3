@@ -141,30 +141,36 @@ const updateBooks = async (req, res) => {
         if (!validation.isValidRequest(dataToUpdate)) return res.status(400).send({ status: false, message: "Please enter details you want to update." })
 
         // If title is present 
+        if (title){
         if (!validation.isValid(title))
             return res.status(400).send({ status: false, message: "Title is invalid (Should Contain Alphabets, numbers, quotation marks  & [@ , . ; : ? & ! _ - $]." })
 
         const uniqueTitle = await bookModel.findOne({ title })
         if (uniqueTitle) return res.status(400).send({ status: false, message: "Title is already present." })
         dataToUpdate['title'] = title
-
+        }
 
         // If ISBN is present  
+        if (ISBN){
         if (!validation.isValid(ISBN) || !validation.isValidISBN(ISBN)) return res.status(400).send({ status: false, message: "Not a Valid ISBN. (Only 10 or 13 digit number.)" })
 
         const uniqueISBN = await bookModel.findOne({ ISBN })
         if (uniqueISBN) return res.status(400).send({ status: false, message: "ISBN is already present." })
         dataToUpdate['ISBN'] = ISBN
-
+        }
 
         // If Releaded date is present
+        if (releasedAt){
         if (!validation.isValidDate(releasedAt) || !validation.isValid(releasedAt))
             return res.status(400).send({ status: false, message: "Date should be valid & format will YYYY-MM-DD" })
         dataToUpdate['releasedAt'] = releasedAt
-
+        }
+        
         // If excerpt is present
+        if (excerpt){
         if (!validation.isValid(excerpt)) return res.status(400).send({ status: false, message: "Please enter a valid excerpt." })
         dataToUpdate['excerpt'] = excerpt
+        }
 
         // Final data Updation
         const updatedDetails = await bookModel.findByIdAndUpdate({ _id: bookIdParams }, dataToUpdate, { new: true })
