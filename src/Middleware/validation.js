@@ -35,11 +35,6 @@ const isValidPhone = function (Phone) {
     const mobileRegex = /^[6-9]\d{9}$/
     return mobileRegex.test(Phone)
 }
-//     const pinRegex = /^[1-9][0-9]{6}*$/
-//     return pinRegex.test(pincode)
-// }
-
-
 
 //title validation
 const isValidTitle = function (title) {
@@ -56,7 +51,7 @@ const isValidDate =function(date){
     const dateRegex = /^\d{4}-(02-(0[1-9]|[12][0-9])|(0[469]|11)-(0[1-9]|[12][0-9]|30)|(0[13578]|1[02])-(0[1-9]|[12][0-9]|3[01]))$/
     return dateRegex.test(date)
 }
-//Rating Validation
+//Date Validation
 const isValidRating =function (ISBN){
     const RatingRegex = /^[1-5]$/
     return RatingRegex.test(ISBN)
