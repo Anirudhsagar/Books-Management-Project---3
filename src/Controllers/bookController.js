@@ -13,14 +13,14 @@ const createBook = async (req, res) => {
 
         // Title Validation
         if (!validation.isValid(title)) return res.status(400).send({ status: false, message: "Title is required" })
-        if (!validation.isValidName(title)) { return res.status(400).send({ status: false, msg: "Title is invalid" }) }
+       
 
         let checkTitle = await bookModel.findOne({ title })
         if (checkTitle) return res.status(400).send({ status: false, message: "Title has been already used please choose different" })
 
         // excerpt Validation  
         if (!validation.isValid(excerpt)) return res.status(400).send({ status: false, message: "enter valid excerpt" });
-        if (!validation.isValidName(excerpt)) { return res.status(400).send({ status: false, message: "Excerpt is invalid" }) }
+
 
         //userId Validation
         if (!validation.isValid(userId)) return res.status(400).send({ status: false, message: "UserId is required" });
@@ -75,9 +75,8 @@ const getBooks = async function (req, res) {
         if (data.userId) {
             if (!validation.isValidId(data.userId)) return res.status(400).send({ status: false, message: "Not a valid userId" });
         }
-        let books = await bookModel.find({ isDeleted: false, ...data }).sort({ title: 1 }).select({ _id: 1, title: 1, excerpt: 1, userId: 1, category: 1, releasedAt: 1, reviews: 1 })
-        // Sorting title alphabetically
-        books.sort((a, b) => a.title.localeCompare(b.title))
+        let books = await bookModel.find({ isDeleted: false, ...data }).select({ _id: 1, title: 1, excerpt: 1, userId: 1, category: 1, releasedAt: 1, reviews: 1 }).sort({ title: 1 })
+       
 
         if (books && books.length === 0) return res.status(404).send({ status: false, msg: "No data found for given user" });
         return res.status(200).send({ status: true, message: "Books list", data: books })

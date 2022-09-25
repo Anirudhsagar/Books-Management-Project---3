@@ -53,7 +53,7 @@ const userData = async (req, res) => {
         // In address the city is present
         if (address.city) {
             if (!validation.isValid(address.city)) return res.status(400).send({ status: false, message: "'Please Enter city" })
-            if (!validation.isValidName(address.city)) return res.status(400).send({ status: false, message: "city is invalid" })
+            // if (!validation.isValidName(address.city)) return res.status(400).send({ status: false, message: "city is invalid" })
         }
         // In address the pincode is present
         if (address.pincode) {
@@ -99,8 +99,8 @@ const loginUser = async function (req, res) {
         let token = jwt.sign(
             {
                 userId: checkData._id.toString(),  // PAYLOAD
-                iat: Math.floor(Date.now() / 1000),
-                exp: Math.floor(Date.now() / 1000) + 24 * 60 * 60
+                iat: Math.floor(Date.now() / 1000), //issued at
+                exp: Math.floor(Date.now() / 1000) + 24 * 60 * 60 //expiration time
             },
             "plutonium-project-key"  //SECRET KEY
         );
