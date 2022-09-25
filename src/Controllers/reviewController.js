@@ -11,9 +11,9 @@ const createReview = async function (req, res) {
         const bookIdParams = req.params.bookId
 
         // Validation of Req Body
-        if (!validation.isValidRequest(reviewData)) return res.status(400).send({ status: false, messege: "Please enter review data" })
+        if (!validation.isValidRequest(reviewData)) return res.status(400).send({ status: false, message: "Please enter review data" })
         // Validation of book id in Params
-        if (!validation.isValidId(bookIdParams)) return res.status(400).send({ status: false, messege: "Not a valid Book id in url" });
+        if (!validation.isValidId(bookIdParams)) return res.status(400).send({ status: false, message: "Not a valid Book id in url" });
 
         // Find not deleted books by id
         const findBook = await bookModel.findOne({ _id: bookIdParams, isDeleted: false })
@@ -33,7 +33,7 @@ const createReview = async function (req, res) {
 
 
         //Rating Validation
-        if (!validation.isValid(rating)) return res.status(400).send({ status: false, messege: "Rating is required" })
+        if (!validation.isValid(rating)) return res.status(400).send({ status: false, message: "Rating is required" })
         if (((rating < 1) || (rating > 5)) || (!validation.isValidRating(rating)))
             return res.status(400).send({ status: false, message: "Rating must be  1 to 5 numeriacl value" });
 

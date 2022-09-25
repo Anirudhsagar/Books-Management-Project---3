@@ -25,7 +25,7 @@ const userData = async (req, res) => {
     const uniquePhone = await userModel.findOne({ phone: phone });
     if (uniquePhone) return res.status(400).send({ status: false, message: "Phone Number already exists" });
 
-    //Email Valiadtion
+    //Email Validation
     if (!validation.isValid(email)) return res.status(400).send({ status: false, message: "Email is Required." });
     if (!validation.isValidEmail(email)) return res.status(400).send({ status: false, message: "Not a valid emailId. e.g: abc@xyz.com" });
 

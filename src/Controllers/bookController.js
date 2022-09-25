@@ -161,7 +161,7 @@ const updateBooks = async (req, res) => {
         dataToUpdate['ISBN'] = ISBN
     }
 
-        // If Releaded date is present
+        // If Released date is present
         if(releasedAt){
         if (!validation.isValidDate(releasedAt) || !validation.isValid(releasedAt))
             return res.status(400).send({ status: false, message: "Date should be valid & format will YYYY-MM-DD" })
@@ -172,7 +172,7 @@ const updateBooks = async (req, res) => {
         if (!validation.isValid(excerpt)) return res.status(400).send({ status: false, message: "Please enter a valid excerpt." })
         dataToUpdate['excerpt'] = excerpt
     }
-        // Final data Updation
+        // Final data Updating
         const updatedDetails = await bookModel.findByIdAndUpdate({ _id: bookIdParams }, dataToUpdate, { new: true })
         res.status(200).send({ status: true, message: "Book details updated successfully", data: updatedDetails })
     }
