@@ -23,6 +23,11 @@ const createReview = async function (req, res) {
 
         // Validation of reviewby
 
+
+        if(!reviewedBy){
+            reviewedBy = "Guest"
+        }
+
         if (!validation.isValid(reviewedBy)) return res.status(400).send({ status: false, message: "Please Enter reviwedBy name" });
         if (!validation.isValidName(reviewedBy)) return res.status(400).send({ status: false, message: "Reviewer's Name should contain alphabets only." });
 
@@ -36,6 +41,7 @@ const createReview = async function (req, res) {
         if (review) {
             if (!validation.isValid(review)) return res.status(400).send({ status: false, message: "Please Enter any review" });
         }
+      
 
         if (isDeleted == true) return res.status(400).send({ status: false, message: "You can't add this key at review creation time." })
 
@@ -46,11 +52,20 @@ const createReview = async function (req, res) {
         const createReview = await reviewModel.create(reviewData)
 
         // Getting new Review data
-        const reviewList = await reviewModel.findOne({ _id: createReview._id }).select({ isDeleted: 0, createdAt: 0, updatedAt: 0, __v: 0 }).populate("bookId")
+        const reviewList = await reviewModel.findOne({ _id: createReview._id }).select({ isDeleted: 0, createdAt: 0, updatedAt: 0, __v: 0 })
 
+        
         // Updating The review count
-         await bookModel.findOneAndUpdate({ _id: bookIdParams }, { $inc: { reviews: +1 } }, { new: true }).select({ __v: 0 })
-        res.status(201).send({ status: true, message: "Review Successful", data: reviewList })
+         const  updatingReviewCount = await bookModel.findOneAndUpdate({ _id: bookIdParams }, { $inc: { reviews: +1 } }, { new: true }).select({ __v: 0 })
+
+           // Assigning reviews list
+           const bookWithReview = updatingReviewCount.toObject()
+           bookWithReview['reviewsData']=reviewList
+ 
+
+        res.status(201).send({ status: true, message: "Review Successful", data: bookWithReview })
+
+
     }
     catch (error) {
         return res.status(500).send({ status: false, message: error.message })

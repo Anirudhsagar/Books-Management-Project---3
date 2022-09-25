@@ -107,7 +107,7 @@ const getBooksById = async function (req, res) {
         const data = allData.toObject()  //to change mongoose document into objects (.toObject() is a function in mongoose)
         data["reviewsData"] = reviews
 
-        return res.status(200).send({ status: true, message: "Books List", data: allData })
+        return res.status(200).send({ status: true, message: "Books List", data: data })
 
     } catch (err) {
         return res.status(500).send({ status: false, message: err.message })
