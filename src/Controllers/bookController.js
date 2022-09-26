@@ -13,7 +13,6 @@ const createBook = async (req, res) => {
 
         // Title Validation
         if (!validation.isValid(title)) return res.status(400).send({ status: false, message: "Title is required" })
-       
 
         let checkTitle = await bookModel.findOne({ title })
         if (checkTitle) return res.status(400).send({ status: false, message: "Title has been already used please choose different" })
@@ -103,7 +102,7 @@ const getBooksById = async function (req, res) {
         const reviews = await reviewModel.find({ bookId: allData._id, isDeleted: false }).select({ _id: 1, bookId: 1, reviewedBy: 1, reviewedAt: 1, rating: 1, review: 1 })
 
         //Assigning reviewdata key
-        const data = allData.toObject()  //to change mongoose document into objects (.toObject() is a function in mongoose)
+        //const data = allData.toObject()  //to change mongoose document into objects (.toObject() is a function in mongoose)
         data["reviewsData"] = reviews
 
         return res.status(200).send({ status: true, message: "Books List", data: data })
@@ -141,8 +140,6 @@ const updateBooks = async (req, res) => {
 
         // If title is present 
         if (title){
-
-
         if (!validation.isValid(title))
             return res.status(400).send({ status: false, message: "Title is invalid (Should Contain Alphabets, numbers, quotation marks  & [@ , . ; : ? & ! _ - $]." })
 

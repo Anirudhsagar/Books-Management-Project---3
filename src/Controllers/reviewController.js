@@ -22,12 +22,9 @@ const createReview = async function (req, res) {
         let { reviewedBy, rating, review, isDeleted } = reviewData
 
         // Validation of reviewby
-
-
         if(!reviewedBy){
             reviewedBy = "Guest"
         }
-
         if (!validation.isValid(reviewedBy)) return res.status(400).send({ status: false, message: "Please Enter reviwedBy name" });
         if (!validation.isValidName(reviewedBy)) return res.status(400).send({ status: false, message: "Reviewer's Name should contain alphabets only." });
 
@@ -52,11 +49,11 @@ const createReview = async function (req, res) {
         const createReview = await reviewModel.create(reviewData)
 
         // Getting new Review data
-        const reviewList = await reviewModel.findOne({ _id: createReview._id }).select({ isDeleted: 0, createdAt: 0, updatedAt: 0, __v: 0 })
+        const reviewList = await reviewModel.findOne({ _id: createReview._id }).select({ isDeleted: 0, createdAt: 0, updatedAt: 0 })
 
         
         // Updating The review count
-         const  updatingReviewCount = await bookModel.findOneAndUpdate({ _id: bookIdParams }, { $inc: { reviews: +1 } }, { new: true }).select({ __v: 0 })
+         const  updatingReviewCount = await bookModel.findOneAndUpdate({ _id: bookIdParams }, { $inc: { reviews: +1 } }, { new: true })
 
            // Assigning reviews list
            const bookWithReview = updatingReviewCount.toObject()
@@ -85,7 +82,7 @@ const updateReview = async function (req, res) {
         if (!validation.isValidId(reviewIdParams)) return res.status(400).send({ status: false, msg: "Not a valid Review id from url." });
 
         // Finding not deleted book by Id in url
-        const findBook = await bookModel.findOne({ _id: bookIdParams, isDeleted: false }).select({ __v: 0 })
+        const findBook = await bookModel.findOne({ _id: bookIdParams, isDeleted: false })
         if (!findBook) return res.status(404).send({ status: false, message: "No Book found" })
 
         // Finding the review by if in url
@@ -117,7 +114,7 @@ const updateReview = async function (req, res) {
         dataToUpdate['review'] = review
 
         // Updating The review details
-        const updatedReview = await reviewModel.findOneAndUpdate({ _id: reviewIdParams }, dataToUpdate, { new: true }).select({ isDeleted: 0, createdAt: 0, updatedAt: 0, __v: 0 })
+        const updatedReview = await reviewModel.findOneAndUpdate({ _id: reviewIdParams }, dataToUpdate, { new: true }).select({ isDeleted: 0, createdAt: 0, updatedAt: 0 })
 
         // Assigning reviews list with book details
         const booksWithUpdatedReview = findBook.toObject()
