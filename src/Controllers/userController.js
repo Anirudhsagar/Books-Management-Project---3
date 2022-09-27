@@ -105,7 +105,7 @@ const loginUser = async function (req, res) {
             "plutonium-project-key"  //SECRET KEY
         );
         res.setHeader("x-api-key", token);
-        res.status(200).send({ status: true, message: "Author login successful", data: { token } })
+        res.status(200).send({ status: true, message: "Author login successful",data: token, iat: payload.iat, exp: payload.exp })
     }
     catch (err) {
         return res.status(500).send({ status: false, message: "Error", error: err.message })
