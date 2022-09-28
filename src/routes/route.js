@@ -5,6 +5,7 @@ const userController = require("../Controllers/userController")
 const bookController = require("../Controllers/bookController")
 const reviewController = require("../Controllers/reviewController")
 const middleware = require("../Middleware/auth")
+const aws = require("../AWS/aws")
 
 //User & Login API
 router.post("/register", userController.userData);
@@ -21,6 +22,12 @@ router.delete("/books/:bookId", middleware.auth, bookController.deleteBook)
 router.post("/books/:bookId/review", reviewController.createReview)
 router.put("/books/:bookId/review/:reviewId", reviewController.updateReview)
 router.delete("/books/:bookId/review/:reviewId",reviewController.deletedReview)
+
+
+// router.post("/write-file-aws", async function(req, res){
+
+//     res.status(404).send({ status: false, message: "aws Not Found" })
+// })  
 
 //Error Handing
 router.all('/*', (req, res) => {

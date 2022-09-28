@@ -3,13 +3,15 @@ const userModel = require("../Models/userModel");
 const reviewModel = require("../Models/reviewModel");
 const validation = require("../Middleware/validation");
 const mongoose = require("mongoose");
+const aws = require('../AWS/aws.js')
 
 //-----------------------------------------------------------------------Create Book Api----------------------------------------------------------------------//
 const createBook = async (req, res) => {
     try {
-        let { title, excerpt, userId, ISBN, category, subcategory, releasedAt, isDeleted } = req.body;
+        const data = req.body
+        let { title, excerpt, userId, ISBN, category, subcategory, releasedAt, bookCover, isDeleted } = data
         // If empty request body
-        if (!validation.isValidRequest(req.body)) return res.status(400).send({ status: false, message: "Please enter User data" });
+        if (!validation.isValidRequest(data)) return res.status(400).send({ status: false, message: "Please enter User data" });
 
         // Title Validation
         if (!validation.isValid(title)) return res.status(400).send({ status: false, message: "Title is required" })
@@ -41,9 +43,39 @@ const createBook = async (req, res) => {
 
         //category Validation
         if (!validation.isValid(category)) return res.status(400).send({ status: false, message: "Category is required" });
- 
+
         // subcategory Validation
         if (!validation.isValid(subcategory)) return res.status(400).send({ status: false, message: "SubCategory is required." });
+
+        //if (!validation.isValid(bookCover)) return res.status(400).send({ status: false, message: "bookCover is required" })
+
+        let files = req.files
+        if (files && files.length > 0) {
+
+            let uploadedFileURL = await uploadFile(files[0])
+            const uniqueCover = await bookModel.findOne({ bookCover: uploadedFileURL });
+            if (uniqueCover) { return res.status(400).send({ status: false, message: "book cover already exists" }) }
+
+            data['bookCover'] = uploadedFileURL
+        }
+        else {
+            res.status(400).send({ msg: "No file found" })
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         // releasedAt
         if (!validation.isValid(releasedAt)) return res.status(400).send({ status: false, message: "ReleasedAt is required." });
@@ -75,7 +107,7 @@ const getBooks = async function (req, res) {
             if (!validation.isValidId(data.userId)) return res.status(400).send({ status: false, message: "Not a valid userId" });
         }
         let books = await bookModel.find({ isDeleted: false, ...data }).select({ _id: 1, title: 1, excerpt: 1, userId: 1, category: 1, releasedAt: 1, reviews: 1 }).sort({ title: 1 })
-       
+
 
         if (books && books.length === 0) return res.status(404).send({ status: false, msg: "No data found for given user" });
         return res.status(200).send({ status: true, message: "Books list", data: books })
@@ -102,7 +134,7 @@ const getBooksById = async function (req, res) {
         const reviews = await reviewModel.find({ bookId: allData._id, isDeleted: false }).select({ _id: 1, bookId: 1, reviewedBy: 1, reviewedAt: 1, rating: 1, review: 1 })
 
         //Assigning reviewdata key
-        //const data = allData.toObject()  //to change mongoose document into objects (.toObject() is a function in mongoose)
+        const data = allData.toObject()  //to change mongoose document into objects (.toObject() is a function in mongoose)
         data["reviewsData"] = reviews
 
         return res.status(200).send({ status: true, message: "Books List", data: data })
@@ -139,35 +171,35 @@ const updateBooks = async (req, res) => {
         if (!validation.isValidRequest(dataToUpdate)) return res.status(400).send({ status: false, message: "Please enter details you want to update." })
 
         // If title is present 
-        if (title){
-        if (!validation.isValid(title))
-            return res.status(400).send({ status: false, message: "Title is invalid (Should Contain Alphabets, numbers, quotation marks  & [@ , . ; : ? & ! _ - $]." })
+        if (title) {
+            if (!validation.isValid(title))
+                return res.status(400).send({ status: false, message: "Title is invalid (Should Contain Alphabets, numbers, quotation marks  & [@ , . ; : ? & ! _ - $]." })
 
-        const uniqueTitle = await bookModel.findOne({ title })
-        if (uniqueTitle) return res.status(400).send({ status: false, message: "Title is already present." })
-        dataToUpdate['title'] = title
+            const uniqueTitle = await bookModel.findOne({ title })
+            if (uniqueTitle) return res.status(400).send({ status: false, message: "Title is already present." })
+            dataToUpdate['title'] = title
         }
 
         // If ISBN is present  
-        if (ISBN){
-        if (!validation.isValid(ISBN) || !validation.isValidISBN(ISBN)) return res.status(400).send({ status: false, message: "Not a Valid ISBN. (Only 10 or 13 digit number.)" })
+        if (ISBN) {
+            if (!validation.isValid(ISBN) || !validation.isValidISBN(ISBN)) return res.status(400).send({ status: false, message: "Not a Valid ISBN. (Only 10 or 13 digit number.)" })
 
-        const uniqueISBN = await bookModel.findOne({ ISBN })
-        if (uniqueISBN) return res.status(400).send({ status: false, message: "ISBN is already present." })
-        dataToUpdate['ISBN'] = ISBN
-    }
+            const uniqueISBN = await bookModel.findOne({ ISBN })
+            if (uniqueISBN) return res.status(400).send({ status: false, message: "ISBN is already present." })
+            dataToUpdate['ISBN'] = ISBN
+        }
 
         // If Released date is present
-        if(releasedAt){
-        if (!validation.isValidDate(releasedAt) || !validation.isValid(releasedAt))
-            return res.status(400).send({ status: false, message: "Date should be valid & format will YYYY-MM-DD" })
-        dataToUpdate['releasedAt'] = releasedAt
+        if (releasedAt) {
+            if (!validation.isValidDate(releasedAt) || !validation.isValid(releasedAt))
+                return res.status(400).send({ status: false, message: "Date should be valid & format will YYYY-MM-DD" })
+            dataToUpdate['releasedAt'] = releasedAt
         }
         // If excerpt is present
-        if(excerpt){
-        if (!validation.isValid(excerpt)) return res.status(400).send({ status: false, message: "Please enter a valid excerpt." })
-        dataToUpdate['excerpt'] = excerpt
-    }
+        if (excerpt) {
+            if (!validation.isValid(excerpt)) return res.status(400).send({ status: false, message: "Please enter a valid excerpt." })
+            dataToUpdate['excerpt'] = excerpt
+        }
         // Final data Updating
         const updatedDetails = await bookModel.findByIdAndUpdate({ _id: bookIdParams }, dataToUpdate, { new: true })
         res.status(200).send({ status: true, message: "Book details updated successfully", data: updatedDetails })

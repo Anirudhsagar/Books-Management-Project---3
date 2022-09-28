@@ -1,7 +1,7 @@
 const userModel = require("../Models/userModel")
 const validation = require("../Middleware/validation")
 const jwt = require("jsonwebtoken");
-
+const aws= require('../AWS/aws.js')
 //---------------------------------------------------------Create User Api------------------------------------------------------------------------------------//
 const userData = async (req, res) => {
     try {
@@ -105,7 +105,7 @@ const loginUser = async function (req, res) {
             "plutonium-project-key"  //SECRET KEY
         );
         res.setHeader("x-api-key", token);
-        res.status(200).send({ status: true, message: "Author login successful",data: token, iat: payload.iat, exp: payload.exp })
+        res.status(200).send({ status: true, message: "Author login successful", data: { token } })
     }
     catch (err) {
         return res.status(500).send({ status: false, message: "Error", error: err.message })

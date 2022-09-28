@@ -10,6 +10,8 @@ const BooksSchema = new mongoose.Schema({
     userId: { type: ObjectId, ref: 'User', required: true ,trim: true},
     
     ISBN: { type: String, required: true, unique: true ,trim: true},
+
+    bookCover : {type: String, required: true ,trim: true},
     
     category: { type: String, required: true,trim: true},
    

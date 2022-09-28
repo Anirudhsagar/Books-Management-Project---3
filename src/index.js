@@ -3,6 +3,12 @@ const bodyParser = require('body-parser');
 const route = require('./routes/route');
 const  mongoose  = require('mongoose');
 const app = express();
+const multer= require("multer");
+const aws = require('aws-sdk');
+
+
+app.use( multer().any())
+
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
