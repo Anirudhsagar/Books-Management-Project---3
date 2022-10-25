@@ -24,10 +24,6 @@ router.put("/books/:bookId/review/:reviewId", reviewController.updateReview)
 router.delete("/books/:bookId/review/:reviewId",reviewController.deletedReview)
 
 
-// router.post("/write-file-aws", async function(req, res){
-
-//     res.status(404).send({ status: false, message: "aws Not Found" })
-// })  
 
 //Error Handing
 router.all('/*', (req, res) => {

@@ -1,6 +1,6 @@
 # Plutonium
 
-## Project - Books Management
+## -b Books Management
 
 ### Key points
 - Create a group database `groupXDatabase`. You can clean the db you previously used and resue that.
